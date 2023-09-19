@@ -10,7 +10,6 @@ from _pytest.mark import Mark
 from _pytest.nodes import Item
 from _pytest.reports import TestReport
 from _pytest.terminal import TerminalReporter
-from pytest import StashKey
 
 from pytest_xray.constant import (
     JIRA_CLOUD,
@@ -29,9 +28,6 @@ from pytest_xray.helper import (
     TestCase,
     TestExecution,
 )
-
-
-evidences = StashKey[List[Dict[str, str]]]()
 
 
 class XrayPlugin:
@@ -114,11 +110,7 @@ class XrayPlugin:
         test_keys = self._get_test_keys(item)
         if test_keys and item.nodeid not in report.test_keys:
             report.test_keys[item.nodeid] = test_keys
-        if not hasattr(item, 'report'):
-            setattr(item, 'report', report)
-        global evidences
-        if item.stash.__contains__(evidences):
-            report.evidences = item.stash[evidences]
+        report.evidences = getattr(item, 'evidences', [])
 
     def pytest_runtest_logreport(self, report: TestReport):
         status = self._get_status_from_report(report)
@@ -128,8 +120,6 @@ class XrayPlugin:
         test_keys = report.test_keys.get(report.nodeid)
         if test_keys is None:
             return
-
-        test_evidences = getattr(report, 'evidences', [])
 
         comment = report.longreprtext
         if self.add_captures:
@@ -150,7 +140,7 @@ class XrayPlugin:
                 status=status,
                 comment=comment,
                 status_str_mapper=self.status_str_mapper,
-                evidences=test_evidences
+                evidences=report.evidences
             )
             try:
                 test_case = self.test_execution.find_test_case(test_key)
