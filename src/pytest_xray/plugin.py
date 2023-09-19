@@ -274,9 +274,6 @@ def xray_evidence(request) -> Callable:
             'contentType': contentType
         }
         # Add the new evidence to the stash of the node to get it from the hook function
-        if request.node.stash.__contains__(evidences):
-            request.node.stash[evidences].append(new_evidence)
-        else:
-            request.node.stash[evidences] = [new_evidence]
+        request.node.stash.setdefault(evidences, []).append(new_evidence)
 
     return wrapper_evidence
