@@ -170,7 +170,10 @@ def xray_evidence(request) -> Callable:
         'zip': 'application/zip'
     }
 
-    def wrapper_evidence(path: str | Path = '', *, data: str | bytes = '', ctype: str = '') -> None:
+    def wrapper_evidence(path: Union[str, Path] = '',
+                         *, data: Union[str, bytes] = '',
+                         ctype: str = ''
+                         ) -> None:
         """
         Behaviour of the fixture from the value of 'path', 'data' and 'ctype'
         arguments:

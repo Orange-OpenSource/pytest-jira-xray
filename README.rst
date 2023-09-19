@@ -224,7 +224,7 @@ Attach test evidences
 +++++++++++++++++++++
 
 You can attach evidences for a test, using the ``evidence`` fixture. It enables the use of the
-``evidence(path: str = '', data: AnyStr = '', ctype: str = '')`` function.
+``evidence(path: Union[str, Path] = '', data: Union[str, bytes] = '', ctype: str = '')`` function.
 The following example adds 3 test evidences to the Xray report.
 
 .. code-block:: python
@@ -233,14 +233,15 @@ The following example adds 3 test evidences to the Xray report.
     import pytest
 
     @pytest..mark.xray('JIRA-1')
-    def test_my_process(evidence):
-        evidence(path="data.txt", data="Test", ctype="text/plain")
-        evidence(data="This is the data")
-        evidence(path="test.xyz", ctype="application/prs.xyz")
+    def test_my_process(xray_evidence):
+        xray_evidence(path="data.txt", data="Test", ctype="text/plain")
+        xray_evidence(data="This is the data")
+        xray_evidence(path="test.xyz", ctype="application/prs.xyz")
         assert True
 
 Fixture behaviour is determined from the values of the ``path``, ``data`` and ``ctype``, as
 stated `in the doc of function wrapper_evidence (in plugin.py file) <src/pytest_xray/plugin.py>`_.
+
 
 Hooks
 +++++
