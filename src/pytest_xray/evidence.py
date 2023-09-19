@@ -39,7 +39,7 @@ def xray_evidence(request) -> Callable:
     def wrapper_evidence(path: Union[str, Path] = '',
                          *, data: Union[str, bytes] = '',
                          ctype: str = ''
-                         ) -> None::
+                         ) -> None:
         """
         Behaviour of the fixture from the value of 'path', 'data' and 'ctype'
         arguments:
