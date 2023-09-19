@@ -36,7 +36,10 @@ def xray_evidence(request) -> Callable:
         'zip': 'application/zip'
     }
 
-    def wrapper_evidence(path: str | Path = '', *, data: str | bytes = '', ctype: str = '') -> None:
+    def wrapper_evidence(path: Union[str, Path] = '',
+                         *, data: Union[str, bytes] = '',
+                         ctype: str = ''
+                         ) -> None::
         """
         Behaviour of the fixture from the value of 'path', 'data' and 'ctype'
         arguments:
@@ -104,8 +107,14 @@ def xray_evidence(request) -> Callable:
             evidence_name = evidence_path.name
 
             if data == '':
-                #                if not evidence_path.is_absolute():
-                #                    evidence_path = request.path.parent.joinpath(evidence_path)
+                if not evidence_path.is_absolute():
+                    # Following code is for debugging purpose
+                    # with open("/tmp/pytest-jira-xray_debug.txt", 'a') as f:
+                    #    import os
+                    #    f.write("evidence_path=" + str(evidence_path) + "\n")
+                    #    f.write("cwd=" + os.getcwd() + "\n")
+                    #    f.write("request.path=" + str(request.path) + "\n---\n")
+                    evidence_path = request.path.parent.joinpath(evidence_path)
                 try:
                     with open(evidence_path, 'rb') as f:
                         data_base64 = base64.b64encode(f.read()).decode('utf-8')
