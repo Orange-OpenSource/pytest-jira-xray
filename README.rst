@@ -223,7 +223,7 @@ the following rules:
 Attach test evidences
 +++++++++++++++++++++
 
-The following example adds the test evidences to the Xray report
+The following example adds test evidences to the Xray report
 using the ``xray_evidence`` fixture.
 
 .. code-block:: python
@@ -244,6 +244,7 @@ using the ``xray_evidence`` fixture.
 
 Fixture behaviour is determined from the values of the ``path``, ``data`` and ``ctype``, as
 stated `in the doc of function wrapper_evidence (in evidence.py file) <src/pytest_xray/evidence.py>`_.
+
 
 Hooks
 +++++

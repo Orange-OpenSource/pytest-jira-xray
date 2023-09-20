@@ -1,4 +1,5 @@
 import json
+import os
 import textwrap
 from pathlib import Path
 
@@ -51,13 +52,15 @@ def xray_tests_multi_fail(testdir):
 
 
 @pytest.fixture()
-def xray_tests_evidence(testdir):
+def xray_tests_evidence(pytester):
     """
     Copyright © 2023 Orange - All rights reserved
     """
-    localfile = Path(testdir.makefile('.txt', test='Test')).name
-    emptyfile = testdir.makefile('.txt', empty='')
-    test_example = textwrap.dedent(f"""\
+    localfile = Path(pytester.makefile('.txt', test='Test')).name
+    emptyfile = pytester.makefile('.txt', empty='')
+    subdirfile = Path(pytester.makefile('.txt', test2='Test')).name
+    pytester.makepyfile(
+        f"""
         import pytest
         from pytest_xray.exceptions import XrayError
 
@@ -81,9 +84,23 @@ def xray_tests_evidence(testdir):
             with pytest.raises(XrayError):
                 xray_evidence("{RESOURCE_DIR}/testt.txt")    # file not found
             assert True
+        """,
+        test_ex2=f"""
+        import pytest
+
+        @pytest.mark.xray('JIRA-2')
+        def test_pass(xray_evidence):
+            xray_evidence("{subdirfile}")
+            assert True
         """)  # noqa: W293,W291
-    testdir.makepyfile(test_example)
-    return testdir
+
+    dir = pytester.mkdir('subdir')
+    # move test_ex2.py and test2.txt to subdir
+    os.rename(pytester.path.joinpath(subdirfile),
+              pytester.path.joinpath(dir, subdirfile))
+    os.rename(pytester.path.joinpath('test_ex2.py'),
+              pytester.path.joinpath(dir, 'test_ex2.py'))
+    return pytester
 
 
 def test_help_message(xray_tests):
@@ -181,10 +198,17 @@ def test_if_user_can_attach_evidences(xray_tests_evidence):
              {'data': 'LS1UZXN0',
                  'filename': 'attachment4',
                  'contentType': 'text/prs.testing'}
+         ]},
+        {'testKey': 'JIRA-2',
+         'status': 'PASS',
+         'evidences': [
+             {'data': 'VGVzdA==',
+                 'filename': 'test2.txt',
+                 'contentType': 'text/plain'},
          ]}
     ]
 
-    xray_file = xray_tests_evidence.tmpdir.join('xray.json')
+    xray_file = xray_tests_evidence.path.joinpath('xray.json')
     result = xray_tests_evidence.runpytest('--jira-xray', '--xraypath', str(xray_file))
     assert result.ret == 0
     xray_result = json.load(xray_file.open())
